@@ -12,7 +12,7 @@
 #include <sys/select.h>
 
 #define MAXLINE 80
-int port = 90;
+int port = 80;
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
 	int flags = fcntl(sock_fd, F_GETFL, 0);
 	fcntl(sock_fd, F_SETFL, flags | O_NONBLOCK);
-	
+	printf("fcntl %d\n", flags);	
 	n=connect(sock_fd, (void *)&pin, sizeof(pin));
 	if (-1 == n)
 	{
@@ -76,8 +76,18 @@ int main(int argc, char *argv[])
 			printf("Step getsockopt\n");
 		}
 	}
+	struct timeval tv = {5,0};
+	int ret;
 
-	printf("Connect succeed!");
+	printf("Connect succeed!\n");
+	fcntl(sock_fd, F_SETFL, O_RDWR);
+	
+	ret = setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof(tv));
+	printf("ret %d\n", ret);
+
+	ret = recv(sock_fd, buf, 80, 0);
+	printf("ret %d\n", ret);
+
 	close(sock_fd);
 	return 0;
 }
